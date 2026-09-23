@@ -16,7 +16,7 @@ pipeline {
 
         stage('Install & Build') {
             steps {
-                sh 'npm ci'
+                sh 'npm install'
                 sh 'npm run unit || true'
             }
             post {
