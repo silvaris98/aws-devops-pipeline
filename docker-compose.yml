@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+  selenium:
+    image: selenium/standalone-chrome:latest
+    ports:
+      - "4444:4444"
