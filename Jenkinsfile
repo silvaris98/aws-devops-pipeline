@@ -31,11 +31,10 @@ pipeline {
                 withSonarQubeEnv('SonarQube Server') {
                     sh '''
                       sonar-scanner \
-                      -Dsonar.projectKey=spacexp-sample \
-                      -Dsonar.sources=. \
-                      -Dsonar.host.url=http://localhost:9000 \
-                      -Dsonar.login=sqa_78ee60d8765485f461038d297280695859570fdf
-                    '''
+              -Dsonar.projectKey=spacexp-sample \
+              -Dsonar.sources=. \
+              -Dsonar.host.url=http://localhost:9000
+            '''
                 }
             }
         }
