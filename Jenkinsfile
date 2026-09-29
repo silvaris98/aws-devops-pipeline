@@ -28,17 +28,14 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
-                    withSonarQubeEnv('SonarQube Server') {
-                        
-                         sh '''
+                withSonarQubeEnv('SonarQube Server') {
+                    sh '''
                       sonar-scanner \
                       -Dsonar.projectKey=spacexp-sample \
                       -Dsonar.sources=. \
                       -Dsonar.host.url=http://localhost:9000 \
                       -Dsonar.login=c323ab313dde3b607acaabeab4082a9963605e3f
                     '''
-                    }
                 }
             }
         }
