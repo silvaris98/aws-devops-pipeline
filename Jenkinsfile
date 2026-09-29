@@ -34,7 +34,7 @@ pipeline {
                       -Dsonar.projectKey=spacexp-sample \
                       -Dsonar.sources=. \
                       -Dsonar.host.url=http://localhost:9000 \
-                      -Dsonar.login=c323ab313dde3b607acaabeab4082a9963605e3f
+                      -Dsonar.login=sqa_78ee60d8765485f461038d297280695859570fdf
                     '''
                 }
             }
