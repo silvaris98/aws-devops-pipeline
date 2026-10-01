@@ -4,7 +4,7 @@ services:
     build: .
     ports:
       - "8082:8080"
-  selenium:
+  selenium: 
     image: selenium/standalone-chrome:latest
     ports:
       - "4444:4444"
