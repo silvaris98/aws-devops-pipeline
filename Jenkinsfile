@@ -56,7 +56,7 @@ pipeline {
          stage('Run Integration (Docker + Selenium)') {
             steps {
                 sh 'docker-compose -f docker-compose.yml up -d --build'
-                sh 'sleep 6'
+                sh 'sleep 20'
                 sh 'npm test || (docker-compose -f docker-compose.yml down; exit 1)'
             }
             post {
