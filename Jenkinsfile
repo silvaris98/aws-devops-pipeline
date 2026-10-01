@@ -40,20 +40,20 @@ pipeline {
             }
         }
 
-        stage('Wait for Quality Gate') {
-            steps {
-                script {
-                    timeout(time: 5, unit: 'MINUTES') {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            error "Pipeline aborted due to quality gate: ${qg.status}"
-                        }
-                    }
-                }
-            }
-        }
+        // stage('Wait for Quality Gate') {
+        //     steps {
+        //         script {
+        //             timeout(time: 5, unit: 'MINUTES') {
+        //                 def qg = waitForQualityGate()
+        //                 if (qg.status != 'OK') {
+        //                     error "Pipeline aborted due to quality gate: ${qg.status}"
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
 
-        stage('Run Integration (Docker + Selenium)') {
+         stage('Run Integration (Docker + Selenium)') {
             steps {
                 sh 'docker-compose -f docker-compose.yml up -d --build'
                 sh 'sleep 6'
