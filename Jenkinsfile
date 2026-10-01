@@ -30,9 +30,10 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube Server') {
                     sh '''
-                      sonar-scanner \
+                    sonar-scanner \
               -Dsonar.projectKey=spacexp-sample \
               -Dsonar.sources=. \
+              -Dsonar.exclusions=**/node_modules/**,**/reports/** \
               -Dsonar.host.url=http://localhost:9000
             '''
                 }
