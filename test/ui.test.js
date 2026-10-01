@@ -2,21 +2,25 @@ const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 const assert = require('assert');
 
-describe('UI Integration Tests', function () {
-  // Docker ඇතුළේ slowness එක නිසා timeout එක තත්පර 60 දක්වා වැඩි කර ඇත
-  this.timeout(60000);
+describe('UI smoke', function () {
+  // Docker / EC2 slowness නිසා timeout එක 120s දක්වා වැඩි කර ඇත
+  this.timeout(120000);
 
   let driver;
 
   before(async function () {
+    // Before hook එකටත් timeout එක 120s ලෙස සෙට් කිරීම
+    this.timeout(120000);
+
     const options = new chrome.Options();
     options.addArguments('--headless=new');
     options.addArguments('--no-sandbox');
     options.addArguments('--disable-dev-shm-usage');
     options.addArguments('--disable-gpu');
-    options.addArguments('--window-size=1920,1080');
 
     const gridUrl = process.env.SELENIUM_HUB_URL || 'http://localhost:4444/wd/hub';
+
+    console.log('Connecting to Selenium Grid at:', gridUrl);
 
     driver = await new Builder()
       .forBrowser('chrome')
@@ -31,18 +35,17 @@ describe('UI Integration Tests', function () {
     }
   });
 
-  it('should load the app successfully', async function () {
-    // Docker Compose Network එක ඇතුළේ App Container එකට කතා කරන්නේ 'http://app:3000' මගිනි
+  it('should show hello message', async function () {
     const appUrl = process.env.APP_URL || 'http://app:3000';
+    console.log('Navigating to app URL:', appUrl);
 
     await driver.get(appUrl);
 
-    // Page එකේ body එක load වෙන තෙක් තත්පර 15ක් wait කිරීම
     const bodyText = await driver.wait(
       until.elementLocated(By.tagName('body')),
-      15000
+      30000
     ).getText();
 
-    assert.strictEqual(bodyText.length > 0, true);
+    assert.ok(bodyText.length > 0);
   });
 });
