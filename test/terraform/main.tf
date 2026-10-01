@@ -4,16 +4,19 @@ provider "aws" {
 
 resource "aws_security_group" "app_sg" {
   name        = "ci-cd-app-sg"
-  description = "Allow ssh and app http"
+  description = "Allow restricted ssh and app http"
 
+  # SSH Port (22) - Public 0.0.0.0/0 වෙනුවට Internal Subnet එකකට Restrict කර ඇත
+  # (SonarQube Security Hotspot violation එක නිවැරදි කිරීමට)
   ingress {
     description = "ssh"
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = ["10.0.0.0/16"]
   }
 
+  # App HTTP Port (8080)
   ingress {
     description = "app"
     from_port   = 8080
