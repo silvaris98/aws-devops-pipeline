@@ -3,6 +3,7 @@ const chrome = require('selenium-webdriver/chrome');
 const assert = require('assert');
 
 describe('UI smoke', function () {
+  // Mocha suite timeout එක විනාඩි 2ක් දක්වා වැඩි කිරීම
   this.timeout(120000);
 
   let driver;
@@ -37,7 +38,7 @@ describe('UI smoke', function () {
     const appUrl = process.env.APP_URL || 'http://app:3000';
     console.log('Navigating to app URL:', appUrl);
 
-    // App එක Docker ඇතුළේ up වෙනකම් retry 10ක් සිදුකිරීම
+    // App එක Docker එක ඇතුළේ ready වෙනකම් retries 10ක් සිදුකිරීම
     let loaded = false;
     for (let i = 0; i < 10; i++) {
       try {
@@ -45,19 +46,20 @@ describe('UI smoke', function () {
         loaded = true;
         break;
       } catch (err) {
-        console.log(`App not ready yet, retrying in 3s... (${i + 1}/10)`);
+        console.log(`App not ready yet, retrying in 3 seconds... (${i + 1}/10)`);
         await new Promise((resolve) => setTimeout(resolve, 3000));
       }
     }
 
     assert.strictEqual(loaded, true, 'Failed to connect to App container');
 
+    // Body tag එක load වන තෙක් තත්පර 30ක් wait කිරීම
     const bodyElement = await driver.wait(
       until.elementLocated(By.tagName('body')),
       30000
     );
 
     const bodyText = await bodyElement.getText();
-    assert.ok(bodyText.length > 0);
+    assert.ok(bodyText.length > 0, 'Body text is empty');
   });
 });
