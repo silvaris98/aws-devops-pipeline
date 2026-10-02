@@ -3,8 +3,7 @@ const chrome = require('selenium-webdriver/chrome');
 const assert = require('assert');
 
 describe('UI smoke test', function () {
-  // Mocha suite timeout එක තත්පර 120 දක්වා වැඩි කිරීම
-  this.timeout(120000);
+  this.timeout(120000); // Suite level timeout 2 minutes
 
   let driver;
 
@@ -20,40 +19,51 @@ describe('UI smoke test', function () {
     const gridUrl = process.env.SELENIUM_HUB_URL || 'http://localhost:4444/wd/hub';
     console.log('Connecting to Selenium Grid at:', gridUrl);
 
-    driver = await new Builder()
-      .forBrowser('chrome')
-      .setChromeOptions(options)
-      .usingServer(gridUrl)
-      .build();
+    try {
+      driver = await new Builder()
+        .forBrowser('chrome')
+        .setChromeOptions(options)
+        .usingServer(gridUrl)
+        .build();
+      console.log('Successfully created Remote WebDriver instance.');
+    } catch (err) {
+      console.error('Failed to initialize WebDriver:', err.message);
+      throw err;
+    }
   });
 
   after(async function () {
     if (driver) {
-      await driver.quit();
+      try {
+        await driver.quit();
+        console.log('WebDriver session closed.');
+      } catch (err) {
+        console.error('Error closing driver:', err.message);
+      }
     }
   });
 
   it('should load home page and verify body content', async function () {
-    // Docker Compose network එක ඇතුළේ App container name එක 'spacexp-app' වේ
     const appUrl = process.env.APP_URL || 'http://spacexp-app:3000';
     console.log('Navigating to app URL:', appUrl);
 
     let loaded = false;
-    for (let i = 0; i < 15; i++) {
+    for (let i = 1; i <= 15; i++) {
       try {
         await driver.get(appUrl);
         loaded = true;
-        console.log('Successfully connected to App!');
+        console.log(`[Attempt ${i}/15] Successfully loaded page from ${appUrl}`);
         break;
       } catch (err) {
-        console.log(`App not reachable yet (${err.message}), retrying in 3s... (${i + 1}/15)`);
+        const errorMsg = err ? (err.message || String(err)) : 'Unknown error';
+        console.log(`[Attempt ${i}/15] App not reachable yet: ${errorMsg}. Retrying in 3s...`);
         await new Promise((resolve) => setTimeout(resolve, 3000));
       }
     }
 
-    assert.strictEqual(loaded, true, 'Failed to connect to App container within 45 seconds');
+    assert.strictEqual(loaded, true, `Failed to reach App container at ${appUrl} after 15 attempts.`);
 
-    // Body element එක load වෙනකම් wait කිරීම
+    // Wait for body element
     const bodyElement = await driver.wait(
       until.elementLocated(By.tagName('body')),
       30000
@@ -61,6 +71,6 @@ describe('UI smoke test', function () {
 
     const bodyText = await bodyElement.getText();
     console.log('Body Text retrieved:', bodyText);
-    assert.ok(bodyText.length >= 0);
+    assert.ok(bodyText !== null && bodyText !== undefined);
   });
 });
