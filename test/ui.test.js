@@ -3,13 +3,11 @@ const chrome = require('selenium-webdriver/chrome');
 const assert = require('assert');
 
 describe('UI smoke', function () {
-  // Docker / EC2 slowness නිසා timeout එක 120s දක්වා වැඩි කර ඇත
   this.timeout(120000);
 
   let driver;
 
   before(async function () {
-    // Before hook එකටත් timeout එක 120s ලෙස සෙට් කිරීම
     this.timeout(120000);
 
     const options = new chrome.Options();
@@ -39,13 +37,27 @@ describe('UI smoke', function () {
     const appUrl = process.env.APP_URL || 'http://app:3000';
     console.log('Navigating to app URL:', appUrl);
 
-    await driver.get(appUrl);
+    // App එක Docker ඇතුළේ up වෙනකම් retry 10ක් සිදුකිරීම
+    let loaded = false;
+    for (let i = 0; i < 10; i++) {
+      try {
+        await driver.get(appUrl);
+        loaded = true;
+        break;
+      } catch (err) {
+        console.log(`App not ready yet, retrying in 3s... (${i + 1}/10)`);
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      }
+    }
 
-    const bodyText = await driver.wait(
+    assert.strictEqual(loaded, true, 'Failed to connect to App container');
+
+    const bodyElement = await driver.wait(
       until.elementLocated(By.tagName('body')),
       30000
-    ).getText();
+    );
 
+    const bodyText = await bodyElement.getText();
     assert.ok(bodyText.length > 0);
   });
 });
