@@ -15,6 +15,9 @@ describe('UI smoke test', function () {
     options.addArguments('--no-sandbox');
     options.addArguments('--disable-dev-shm-usage');
     options.addArguments('--disable-gpu');
+    options.addArguments('--remote-debugging-port=9222');
+    options.addArguments('--disable-setuid-sandbox');
+    options.addArguments('--disable-extensions');
 
     const gridUrl = process.env.SELENIUM_HUB_URL || 'http://localhost:4444/wd/hub';
     console.log('Connecting to Selenium Grid at:', gridUrl);
@@ -63,7 +66,6 @@ describe('UI smoke test', function () {
 
     assert.strictEqual(loaded, true, `Failed to reach App container at ${appUrl} after 15 attempts.`);
 
-    // Wait for body element
     const bodyElement = await driver.wait(
       until.elementLocated(By.tagName('body')),
       30000
