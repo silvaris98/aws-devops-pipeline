@@ -13,6 +13,10 @@ services:
     image: selenium/standalone-chrome:latest
     container_name: spacexp-selenium
     shm_size: '2gb'
+    cap_add:
+      - SYS_ADMIN
+    security_opt:
+      - seccomp:unconfined
     ports:
       - "4444:4444"
       - "7900:7900"
