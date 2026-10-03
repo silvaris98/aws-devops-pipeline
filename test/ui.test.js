@@ -1,24 +1,13 @@
 const { Builder, By, until } = require('selenium-webdriver');
-const chrome = require('selenium-webdriver/chrome');
 const assert = require('assert');
 
 describe('UI smoke test', function () {
-  this.timeout(120000); // Suite level timeout 2 minutes
+  this.timeout(120000);
 
   let driver;
 
   before(async function () {
     this.timeout(120000);
-
-    const options = new chrome.Options();
-    // Docker container ඇතුළේ Chrome stable ලෙස දිවීමට අත්‍යවශ්‍ය flags
-    options.addArguments('--headless=new');
-    options.addArguments('--no-sandbox');
-    options.addArguments('--disable-dev-shm-usage');
-    options.addArguments('--disable-gpu');
-    options.addArguments('--disable-software-rasterizer');
-    options.addArguments('--disable-dev-tools');
-    options.addArguments('--window-size=1920,1080');
 
     const gridUrl = process.env.SELENIUM_HUB_URL || 'http://localhost:4444/wd/hub';
     console.log('Connecting to Selenium Grid at:', gridUrl);
@@ -26,8 +15,20 @@ describe('UI smoke test', function () {
     try {
       driver = await new Builder()
         .forBrowser('chrome')
-        .setChromeOptions(options)
         .usingServer(gridUrl)
+        .withCapabilities({
+          browserName: 'chrome',
+          'goog:chromeOptions': {
+            args: [
+              '--headless',
+              '--no-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-gpu',
+              '--disable-setuid-sandbox',
+              '--window-size=1920,1080'
+            ]
+          }
+        })
         .build();
       console.log('Successfully created Remote WebDriver instance.');
     } catch (err) {
