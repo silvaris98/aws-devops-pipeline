@@ -11,13 +11,14 @@ describe('UI smoke test', function () {
     this.timeout(120000);
 
     const options = new chrome.Options();
+    // Docker container ඇතුළේ Chrome stable ලෙස දිවීමට අත්‍යවශ්‍ය flags
     options.addArguments('--headless=new');
     options.addArguments('--no-sandbox');
     options.addArguments('--disable-dev-shm-usage');
     options.addArguments('--disable-gpu');
-    options.addArguments('--remote-debugging-port=9222');
-    options.addArguments('--disable-setuid-sandbox');
-    options.addArguments('--disable-extensions');
+    options.addArguments('--disable-software-rasterizer');
+    options.addArguments('--disable-dev-tools');
+    options.addArguments('--window-size=1920,1080');
 
     const gridUrl = process.env.SELENIUM_HUB_URL || 'http://localhost:4444/wd/hub';
     console.log('Connecting to Selenium Grid at:', gridUrl);
