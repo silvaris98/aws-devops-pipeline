@@ -6,12 +6,6 @@ services:
     container_name: spacexp-app
     ports:
       - "3000:8080"
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://127.0.0.1:8080/ || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
     networks:
       - app-network
 
@@ -24,8 +18,7 @@ services:
     cap_add:
       - SYS_ADMIN
     depends_on:
-      spacexp-app:
-        condition: service_healthy
+      - spacexp-app
     ports:
       - "4444:4444"
       - "7900:7900"
