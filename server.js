@@ -1,11 +1,12 @@
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-    res.send(`<html><body><h1>Hello from Softwareplus ${process.env.BUILD_NUMBER || 'local'}</h1></body></html>`);
+  res.send('Hello SpaceX!');
 });
 
-app.listen(port, () => {
-    console.log(`App listening on port ${port}`);
+// 0.0.0.0 ලෙස host එක දීමෙන් Docker network එකේ අනිත් containers වලට Connect විය හැක
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}`);
 });
