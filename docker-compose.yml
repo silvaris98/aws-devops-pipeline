@@ -13,6 +13,9 @@ services:
     image: selenium/standalone-chrome:latest
     container_name: spacexp-selenium
     shm_size: '2gb'
+    environment:
+      - SE_NODE_MAX_SESSIONS=2
+      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
     tmpfs:
       - /tmp
     cap_add:
