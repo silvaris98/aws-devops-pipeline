@@ -1,4 +1,5 @@
 const { Builder, By, until } = require('selenium-webdriver');
+const chrome = require('selenium-webdriver/chrome');
 const assert = require('assert');
 
 describe('UI smoke test', function () {
@@ -9,26 +10,23 @@ describe('UI smoke test', function () {
   before(async function () {
     this.timeout(120000);
 
+    const options = new chrome.Options();
+    options.addArguments('--headless=new');
+    options.addArguments('--no-sandbox');
+    options.addArguments('--disable-dev-shm-usage');
+    options.addArguments('--disable-gpu');
+    options.addArguments('--disable-software-rasterizer');
+    options.addArguments('--remote-debugging-port=9222');
+    options.addArguments('--window-size=1920,1080');
+
     const gridUrl = process.env.SELENIUM_HUB_URL || 'http://localhost:4444/wd/hub';
     console.log('Connecting to Selenium Grid at:', gridUrl);
 
     try {
       driver = await new Builder()
         .forBrowser('chrome')
+        .setChromeOptions(options)
         .usingServer(gridUrl)
-        .withCapabilities({
-          browserName: 'chrome',
-          'goog:chromeOptions': {
-            args: [
-              '--headless',
-              '--no-sandbox',
-              '--disable-dev-shm-usage',
-              '--disable-gpu',
-              '--disable-setuid-sandbox',
-              '--window-size=1920,1080'
-            ]
-          }
-        })
         .build();
       console.log('Successfully created Remote WebDriver instance.');
     } catch (err) {
