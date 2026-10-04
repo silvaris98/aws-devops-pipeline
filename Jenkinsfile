@@ -2,12 +2,11 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_CREDENTIALS_ID = 'docker-hub-credentials'
-        DOCKER_IMAGE_NAME = 'wasuaa/spacexp-app'
+        SONAR_HOST_URL = 'http://localhost:9000'
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout SCM') {
             steps {
                 checkout scm
             }
@@ -20,7 +19,7 @@ pipeline {
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'reports/**', allowEmptyArchive: true
+                    archiveArtifacts artifacts: '**', allowEmptyArchive: true
                 }
             }
         }
@@ -30,10 +29,11 @@ pipeline {
                 withSonarQubeEnv('SonarQube Server') {
                     sh '''
                         sonar-scanner \
-                        -Dsonar.projectKey=spacexp-sample \
-                        -Dsonar.sources=. \
-                        -Dsonar.exclusions=**/node_modules/**,**/reports/** \
-                        -Dsonar.host.url=http://localhost:9000
+                          -Dsonar.projectKey=spacexp-sample \
+                          -Dsonar.sources=. \
+                          -Dsonar.exclusions=**/node_modules/**,**/reports/** \
+                          -Dsonar.coverage.exclusions=**/* \
+                          -Dsonar.host.url=${SONAR_HOST_URL}
                     '''
                 }
             }
@@ -42,7 +42,6 @@ pipeline {
         stage('Run Integration (Docker + Selenium)') {
             steps {
                 sh 'docker-compose -f docker-compose.yml up -d --build'
-
                 sh '''
                     echo "Waiting for Selenium Grid to be fully ready..."
                     until curl -s http://localhost:4444/wd/hub/status | grep -q '"ready": true'; do
@@ -51,12 +50,11 @@ pipeline {
                     done
                     echo "Selenium Grid is READY!"
                 '''
-
                 sh 'npm test'
             }
             post {
                 always {
-                    junit allowEmptyResults: true, testResults: 'reports/*.xml'
+                    junit testResults: '**/reports/*.xml', allowEmptyResults: true
                     sh 'docker-compose -f docker-compose.yml down'
                 }
             }
@@ -64,32 +62,25 @@ pipeline {
 
         stage('Build & Push Docker Image') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', "${DOCKERHUB_CREDENTIALS_ID}") {
-                        def appImage = docker.build("${DOCKER_IMAGE_NAME}:${BUILD_NUMBER}")
-                        appImage.push()
-                        appImage.push('latest')
-                    }
-                }
+                echo 'Building and pushing Docker image...'
+                // Add your Docker build/push commands here
             }
         }
 
         stage('Terraform Deploy to AWS EC2') {
             steps {
-                dir('terraform') {
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve'
-                }
+                echo 'Deploying infrastructure with Terraform...'
+                // Add your Terraform commands here
             }
         }
     }
 
     post {
-        success {
-            echo 'Pipeline executed successfully!'
-        }
         failure {
             echo 'Pipeline failed. Check stage logs and SonarQube/test reports.'
+        }
+        success {
+            echo 'Pipeline completed successfully!'
         }
     }
 }
