@@ -1,6 +1,6 @@
 pipeline {
     agent any
-
+  //hi
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
         DOCKER_IMAGE = 'wasuaa/spacexp-sample'
