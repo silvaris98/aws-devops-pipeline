@@ -64,11 +64,11 @@ pipeline {
 
         stage('Terraform Deploy to AWS EC2') {
             steps {
-                // Terraform ෆෝල්ඩර් එක වෙනම තියෙනවා නම් 'dir('terraform')' පාවිච්චි කරන්න 
-                    // නැත්නම් root එකේම නම් dir block එක ඉවත් කරන්න
-                    dir('terraform') {
-                        sh 'terraform init'
-                        sh 'terraform apply -auto-approve'
+                script {
+                    // Terraform files ටික root එකේ තියෙන නිසා කෙලින්ම කමාන්ඩ් ටික දාලා තියෙනවා
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve'
+                }
             }
         }
     }
