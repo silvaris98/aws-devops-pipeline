@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         SCANNER_HOME = tool 'sonar-scanner'
+        DOCKER_IMAGE = 'wasuaa/spacexp-sample'
     }
 
     stages {
@@ -49,7 +50,15 @@ pipeline {
 
         stage('Build & Push Docker Image') {
             steps {
-                echo 'Building and pushing Docker image...'
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'docker-cred', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')]) {
+                        sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASSWORD}"
+                        sh "docker build -t ${env.DOCKER_IMAGE}:${env.BUILD_NUMBER} ."
+                        sh "docker push ${env.DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                        sh "docker tag ${env.DOCKER_IMAGE}:${env.BUILD_NUMBER} ${env.DOCKER_IMAGE}:latest"
+                        sh "docker push ${env.DOCKER_IMAGE}:latest"
+                    }
+                }
             }
         }
 
