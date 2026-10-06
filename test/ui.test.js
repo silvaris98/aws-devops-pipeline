@@ -1,8 +1,8 @@
-const { Builder, By, until } = require('selenium-webdriver');
+const { Builder } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
 describe('UI Integration Tests', function () {
-  this.timeout(90000); // Timeout 90s
+  this.timeout(90000);
   let driver;
 
   before(async function () {
@@ -13,9 +13,9 @@ describe('UI Integration Tests', function () {
       options.addArguments('--no-sandbox');
       options.addArguments('--disable-dev-shm-usage');
       options.addArguments('--disable-gpu');
+      options.addArguments('--remote-debugging-port=9222');
       options.addArguments('--window-size=1920,1080');
 
-      // Selenium Grid 4 standalone endpoint (Without /wd/hub if deprecated)
       driver = await new Builder()
         .forBrowser('chrome')
         .usingServer('http://localhost:4444')
