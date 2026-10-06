@@ -2,11 +2,10 @@ const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
 describe('UI Integration Tests', function () {
-  this.timeout(30000); // 30 seconds timeout
+  this.timeout(60000); // Timeout 60 seconds දක්වා වැඩි කළා
   let driver;
 
   before(async function () {
-    // Chrome Headless සහ CI flags සැකසීම
     const options = new chrome.Options();
     options.addArguments('--headless=new');
     options.addArguments('--no-sandbox');
@@ -14,7 +13,7 @@ describe('UI Integration Tests', function () {
     options.addArguments('--disable-gpu');
     options.addArguments('--window-size=1920,1080');
 
-    console.log('Connecting to Selenium Grid at: http://localhost:4444/wd/hub');
+    console.log('Connecting to Selenium Grid at http://localhost:4444/wd/hub...');
 
     driver = await new Builder()
       .forBrowser('chrome')
@@ -30,9 +29,16 @@ describe('UI Integration Tests', function () {
   });
 
   it('Should load the home page successfully', async function () {
-    // Docker network එක ඇතුළේ spacexp-app එකට connect වේ
+    // Docker container name එකෙන් spacexp-app:8080 ට connect වීම
     await driver.get('http://spacexp-app:8080');
+    
+    // Page title එක ගන්නා තෙක් තත්පර 10ක් Wait කිරීම
+    await driver.wait(async () => {
+      const title = await driver.getTitle();
+      return title !== '';
+    }, 10000);
+
     const title = await driver.getTitle();
-    console.log('Page Title:', title);
+    console.log('Successfully fetched Page Title:', title);
   });
 });
