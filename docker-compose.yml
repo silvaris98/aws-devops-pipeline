@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   spacexp-app:
     build:
@@ -5,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: spacexp-app
     ports:
-      - "3000:8080"
+      - "8080:8080"
     networks:
       - app-network
 
@@ -13,15 +15,6 @@ services:
     image: selenium/standalone-chrome:latest
     container_name: spacexp-selenium
     shm_size: '2gb'
-    environment:
-      - SE_NODE_MAX_SESSIONS=2
-      - SE_NODE_OVERRIDE_MAX_SESSIONS=true
-    tmpfs:
-      - /tmp
-    cap_add:
-      - SYS_ADMIN
-    depends_on:
-      - spacexp-app
     ports:
       - "4444:4444"
       - "7900:7900"
