@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   spacexp-app:
     build:
@@ -7,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: spacexp-app
     ports:
-      - "8080:8080"
+      - "8081:8080"
     networks:
       - app-network
 
