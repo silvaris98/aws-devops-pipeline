@@ -2,7 +2,7 @@ const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
 describe('UI Integration Tests', function () {
-  this.timeout(60000); // Timeout 60 seconds දක්වා වැඩි කළා
+  this.timeout(60000); // 60 seconds test timeout
   let driver;
 
   before(async function () {
@@ -29,16 +29,17 @@ describe('UI Integration Tests', function () {
   });
 
   it('Should load the home page successfully', async function () {
-    // Docker container name එකෙන් spacexp-app:8080 ට connect වීම
+    console.log('Navigating to http://spacexp-app:8080...');
     await driver.get('http://spacexp-app:8080');
-    
-    // Page title එක ගන්නා තෙක් තත්පර 10ක් Wait කිරීම
-    await driver.wait(async () => {
-      const title = await driver.getTitle();
-      return title !== '';
-    }, 10000);
+
+    // Page එක fully load වන තෙක් තත්පර 15ක් Wait කිරීම
+    await driver.sleep(3000);
 
     const title = await driver.getTitle();
-    console.log('Successfully fetched Page Title:', title);
+    console.log('Fetched Page Title:', title);
+
+    if (!title) {
+      throw new Error('Page title is empty or page failed to render!');
+    }
   });
 });
