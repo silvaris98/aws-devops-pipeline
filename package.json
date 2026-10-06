@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "unit": "echo 'no unit tests yet' && exit 0",
-    "test": "mocha --reporter spec --reporter mocha-junit-reporter --reporter-options mochaFile=./reports/TESTS-results.xml"
+    "test": "npx mocha --timeout 90000 test/ui.test.js"
   },
   "dependencies": {
     "express": "^4.18.2"
