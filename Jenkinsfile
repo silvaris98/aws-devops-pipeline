@@ -65,7 +65,7 @@ pipeline {
         stage('Terraform Deploy to AWS EC2') {
             steps {
                 script {
-                    dir('terraform') {
+                      dir('test/terraform') { // මෙන්න මෙතනට 'test/' කියන එක එකතු කරන්න
                         sh 'terraform init'
                         sh 'terraform apply -auto-approve'
                     }
