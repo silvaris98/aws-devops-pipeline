@@ -26,14 +26,16 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube Server') {
-                    sh '''
-                        sonar-scanner \
-                        -Dsonar.projectKey=spacexp-sample \
-                        -Dsonar.sources=. \
-                        -Dsonar.exclusions=**/node_modules/**,**/reports/** \
-                        -Dsonar.coverage.exclusions=**/*
-                    '''
+               timeout(time: 15, unit: 'MINUTES') {
+                    withSonarQubeEnv('SonarQube Server') {
+                        sh '''
+                            sonar-scanner \
+                            -Dsonar.projectKey=spacexp-sample \
+                            -Dsonar.sources=. \
+                            -Dsonar.exclusions=**/node_modules/**,**/reports/** \
+                            -Dsonar.coverage.exclusions=**/* \
+                            -Dsonar.ws.timeout=300
+                        '''
                 }
             }
         }
