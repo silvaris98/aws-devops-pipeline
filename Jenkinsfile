@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        SONAR_HOST_URL = 'http://localhost:9000'
+        SONAR_HOST_URL = 'http://16.171.137.199:9000'
     }
 
     stages {
@@ -27,29 +27,29 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube Server') {
-                    sh '''
+                    sh """
                         sonar-scanner \
-                          -Dsonar.projectKey=spacexp-sample \
-                          -Dsonar.sources=. \
-                          -Dsonar.exclusions=**/node_modules/**,**/reports/** \
-                          -Dsonar.coverage.exclusions=**/* \
-                          -Dsonar.host.url=${SONAR_HOST_URL}
-                    '''
+                        -Dsonar.projectKey=spacexp-sample \
+                        -Dsonar.sources=. \
+                        -Dsonar.exclusions=**/node_modules/**,**/reports/** \
+                        -Dsonar.coverage.exclusions=**/* \
+                        -Dsonar.host.url=${SONAR_HOST_URL}
+                    """
                 }
             }
         }
 
         stage('Run Integration (Docker + Selenium)') {
             steps {
-                sh 'docker-compose -f docker-compose.yml up -d --build'
                 sh '''
-                    echo "Waiting for Selenium Grid to be fully ready..."
-                    until curl -s http://localhost:4444/wd/hub/status | grep -q '"ready": true'; do
-                        echo "Selenium Grid is starting... waiting 3 seconds."
-                        sleep 3
-                    done
-                    echo "Selenium Grid is READY!"
+                    # Old container cleanup to prevent port binding issues
+                    docker-compose -f docker-compose.yml down --remove-orphans || true
+                    
+                    # Build and start services
+                    docker-compose -f docker-compose.yml up -d --build
                 '''
+                
+                // Selenium test integration script execution
                 sh 'npm test'
             }
             post {
@@ -62,15 +62,15 @@ pipeline {
 
         stage('Build & Push Docker Image') {
             steps {
-                echo 'Building and pushing Docker image...'
-                // Add your Docker build/push commands here
+                echo 'Building and pushing production Docker image...'
+                // Add your docker build & push steps here
             }
         }
 
         stage('Terraform Deploy to AWS EC2') {
             steps {
-                echo 'Deploying infrastructure with Terraform...'
-                // Add your Terraform commands here
+                echo 'Deploying infrastructure using Terraform...'
+                // Add your terraform apply steps here
             }
         }
     }
