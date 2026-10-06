@@ -26,7 +26,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-               timeout(time: 15, unit: 'MINUTES') {
+                timeout(time: 15, unit: 'MINUTES') {
                     withSonarQubeEnv('SonarQube Server') {
                         sh '''
                             sonar-scanner \
@@ -36,6 +36,7 @@ pipeline {
                             -Dsonar.coverage.exclusions=**/* \
                             -Dsonar.ws.timeout=300
                         '''
+                    }
                 }
             }
         }
