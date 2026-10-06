@@ -65,9 +65,10 @@ pipeline {
         stage('Terraform Deploy to AWS EC2') {
             steps {
                 script {
-                    // Terraform files ටික root එකේ තියෙන නිසා කෙලින්ම කමාන්ඩ් ටික දාලා තියෙනවා
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve'
+                    dir('terraform') {
+                        sh 'terraform init'
+                        sh 'terraform apply -auto-approve'
+                    }
                 }
             }
         }
