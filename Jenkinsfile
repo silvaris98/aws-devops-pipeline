@@ -49,13 +49,12 @@ pipeline {
 
         stage('Terraform Deploy to AWS EC2') {
             steps {
-                script {
-                    withCredentials([string(credentialsId: 'AKIAX2MZ6OTF6LFBDIE7', variable: 'AWS_ACCESS_KEY_ID'),
-                                     string(credentialsId: 'kgmXWFr4HIggdWf76x+HWbNVGFX/AcUT0p63yZl/', variable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        dir('test/terraform') {
-                            sh 'terraform init'
-                            sh 'terraform apply -auto-approve -var=ami_id=ami-0aba19e56f3eaec05'
-                        }
+               script {
+            withCredentials([string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
+                             string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                dir('test/terraform') {
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve -var=ami_id=ami-0aba19e56f3eaec05'
                     }
                 }
             }
