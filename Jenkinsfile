@@ -1,10 +1,5 @@
 pipeline {
     agent any
-  //hi
-    environment {
-        SCANNER_HOME = tool 'sonar-scanner'
-        DOCKER_IMAGE = 'wasuaa/spacexp-sample'
-    }
 
     stages {
         stage('Checkout SCM') {
@@ -18,25 +13,13 @@ pipeline {
                 sh 'npm install'
                 sh 'npm run unit'
             }
-            post {
-                always {
-                    archiveArtifacts artifacts: '**/node_modules/**', allowEmptyArchive: true
-                }
-            }
         }
 
         stage('SonarQube Analysis') {
             steps {
                 timeout(time: 15, unit: 'MINUTES') {
                     withSonarQubeEnv('SonarQube Server') {
-                        sh '''
-                            sonar-scanner \
-                            -Dsonar.projectKey=spacexp-sample \
-                            -Dsonar.sources=. \
-                            -Dsonar.exclusions=**/node_modules/**,**/reports/** \
-                            -Dsonar.coverage.exclusions=**/* \
-                            -Dsonar.ws.timeout=300
-                        '''
+                        sh 'sonar-scanner -Dsonar.projectKey=spacexp-sample -Dsonar.sources=. -Dsonar.exclusions=**/node_modules/**,**/reports/**'
                     }
                 }
             }
@@ -51,12 +34,12 @@ pipeline {
         stage('Build & Push Docker Image') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'docker-cred', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')]) {
-                        sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASSWORD}"
-                        sh "docker build -t ${env.DOCKER_IMAGE}:${env.BUILD_NUMBER} ."
-                        sh "docker push ${env.DOCKER_IMAGE}:${env.BUILD_NUMBER}"
-                        sh "docker tag ${env.DOCKER_IMAGE}:${env.BUILD_NUMBER} ${env.DOCKER_IMAGE}:latest"
-                        sh "docker push ${env.DOCKER_IMAGE}:latest"
+                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')]) {
+                        sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin'
+                        sh 'docker build -t wasuaa/spacexp-sample:${env.BUILD_NUMBER} .'
+                        sh 'docker push wasuaa/spacexp-sample:${env.BUILD_NUMBER}'
+                        sh 'docker tag wasuaa/spacexp-sample:${env.BUILD_NUMBER} wasuaa/spacexp-sample:latest'
+                        sh 'docker push wasuaa/spacexp-sample:latest'
                     }
                 }
             }
@@ -65,22 +48,15 @@ pipeline {
         stage('Terraform Deploy to AWS EC2') {
             steps {
                 script {
-            withCredentials([string(credentialsId: 'AKIAX2MZ6OTF6LFBDIE7 ', variable: 'AWS_ACCESS_KEY_ID'),
-                             string(credentialsId: 'kgmXWFr4HIggdWf76x+HWbNVGFX/AcUT0p63yZl/', variable: 'AWS_SECRET_ACCESS_KEY')]) {
-                dir('test/terraform') {
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve -var=ami_id=ami-0aba19e56f3eaec05'
+                    withCredentials([string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
+                                     string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
+                        dir('test/terraform') {
+                            sh 'terraform init'
+                            sh 'terraform apply -auto-approve -var=ami_id=ami-0aba19e56f3eaec05'
+                        }
+                    }
                 }
             }
-        }
-    }
-
-    post {
-        failure {
-            echo 'Pipeline failed. Check stage logs and SonarQube/test reports.'
-        }
-        success {
-            echo 'Pipeline completed successfully!'
         }
     }
 }
