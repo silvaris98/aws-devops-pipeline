@@ -36,10 +36,12 @@ pipeline {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USER')]) {
                         sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin'
-                        sh 'docker build -t wasuaa/spacexp-sample:${env.BUILD_NUMBER} .'
-                        sh 'docker push wasuaa/spacexp-sample:${env.BUILD_NUMBER}'
-                        sh 'docker tag wasuaa/spacexp-sample:${env.BUILD_NUMBER} wasuaa/spacexp-sample:latest'
-                        sh 'docker push wasuaa/spacexp-sample:latest'
+                        sh '''
+                            docker build -t wasuaa/spacexp-sample:${BUILD_NUMBER} .
+                            docker push wasuaa/spacexp-sample:${BUILD_NUMBER}
+                            docker tag wasuaa/spacexp-sample:${BUILD_NUMBER} wasuaa/spacexp-sample:latest
+                            docker push wasuaa/spacexp-sample:latest
+                        '''
                     }
                 }
             }
