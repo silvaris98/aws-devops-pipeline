@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-east-1"
+  region = "eu-north-1"
 }
 
 resource "random_id" "instance" {
@@ -45,15 +45,3 @@ resource "aws_instance" "app" {
     apt-get update -y
     apt-get install -y docker.io
     systemctl start docker
-    docker pull wasuaa/spacexp-sample:latest
-    docker run -d --name myapp -p 8080:8080 --restart=always wasuaa/spacexp-sample:latest
-  EOT
-
-  tags = {
-    Name = "ci-cd-app-${random_id.instance.hex}"
-  }
-}
-
-output "public_ip" {
-  value = aws_instance.app.public_ip
-}
