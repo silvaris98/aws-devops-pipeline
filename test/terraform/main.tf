@@ -9,7 +9,7 @@ resource "random_id" "instance" {
 resource "aws_instance" "app" {
   ami                    = var.ami_id
   instance_type          = "t3.micro"
-  vpc_security_group_ids = ["sg-0358ebca16e7ee6b5"] # ඔබගේ දැනට පවතින Security Group එක මෙහි යොදා ඇත[cite: 2]
+  vpc_security_group_ids = ["sg-0358ebca16e7ee6b5"]
 
   user_data = <<-EOT
     #!/bin/bash
@@ -24,10 +24,6 @@ resource "aws_instance" "app" {
   tags = {
     Name = "ci-cd-app-${random_id.instance.hex}"
   }
-}
-
-variable "ami_id" {
-  type = string
 }
 
 output "public_ip" {
