@@ -6,38 +6,10 @@ resource "random_id" "instance" {
   byte_length = 4
 }
 
-resource "aws_security_group" "app_sg" {
-  name        = "ci-cd-app-sg"
-  description = "Allow restricted ssh and app http"
-
-  ingress {
-    description = "app"
-    from_port   = 8080
-    to_port     = 8080
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    description = "ssh"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["10.0.0.0/16"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-}
-
 resource "aws_instance" "app" {
   ami                    = var.ami_id
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.app_sg.id]
+  instance_type          = "t3.micro"
+  vpc_security_group_ids = ["sg-0358ebca16e7ee6b5"] # ඔබගේ දැනට පවතින Security Group එක මෙහි යොදා ඇත[cite: 2]
 
   user_data = <<-EOT
     #!/bin/bash
@@ -52,6 +24,10 @@ resource "aws_instance" "app" {
   tags = {
     Name = "ci-cd-app-${random_id.instance.hex}"
   }
+}
+
+variable "ami_id" {
+  type = string
 }
 
 output "public_ip" {
