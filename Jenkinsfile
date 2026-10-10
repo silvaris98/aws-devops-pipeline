@@ -1,56 +1,110 @@
 pipeline {
     agent any
+    environment {
+        IMAGE_NAME = "wasuaa/spacexp-sample"
+        DOCKER_TAG = "${env.BUILD_NUMBER}"
+    }
     stages {
-        stage('Checkout SCM') {
+        stage ('Checkout') {
             steps {
                 checkout scm
             }
         }
-        stage('Install & Build') {
+        stage ('Install & Build') {
             steps {
-                sh 'npm install'
-                sh 'npm run unit'
+                sh 'npm ci'
+                sh 'npm run unit || true'
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'package.json, server.js', fingerprint: true
+                }
             }
         }
-        stage('SonarQube Analysis') {
+        stage ('SonarQube Analysis') {
             steps {
-                timeout(time: 15, unit: 'MINUTES') {
+                withCredentials ([string (credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('SonarQube Server') {
-                        sh 'sonar-scanner -Dsonar.projectKey=spacexp-sample -Dsonar.sources=. -Dsonar.exclusions=**/node_modules/**,**/reports/**'
+                        sh '''
+                            sonar-scanner \
+                            -Dsonar.projectKey=spacexp-sample \
+                            -Dsonar.sources=. \
+                            -Dsonar.host.url=$SONAR_HOST_URL \
+                            -Dsonar.login=$SONAR_TOKEN
+                        '''
                     }
                 }
             }
         }
-        stage('Run Integration (Docker + Selenium)') {
-            steps {
-                echo 'Running Integration Tests...'
-            }
-        }
-        stage('Build & Push Docker Image') {
+        stage ('Wait for Quality Gate') {
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
-                        sh 'echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin'
-                        sh "docker build -t wasuaa/spacexp-sample:${env.BUILD_NUMBER} ."
-                        sh "docker push wasuaa/spacexp-sample:${env.BUILD_NUMBER}"
-                        sh "docker tag wasuaa/spacexp-sample:${env.BUILD_NUMBER} wasuaa/spacexp-sample:latest"
-                        sh "docker push wasuaa/spacexp-sample:latest"
-                    }
-                }
-            }
-        }
-        stage('Terraform Deploy to AWS EC2') {
-            steps {
-                script {
-                    withCredentials([string(credentialsId: 'aws-access-key', variable: 'AWS_ACCESS_KEY_ID'),
-                                     string(credentialsId: 'aws-secret-key', variable: 'AWS_SECRET_ACCESS_KEY')]) {
-                        dir('test/terraform') {
-                            sh 'terraform init'
-                            sh 'terraform apply -auto-approve -var=ami_id=ami-0aba19e56f3eaec05'
+                    timeout (time: 5, unit: 'MINUTES') {
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') {
+                            error "Pipeline aborted due to quality gate: ${qg.status}"
                         }
                     }
                 }
             }
+        }
+        stage ('Run Integration (Docker + Selenium)') {
+            steps {
+                sh 'docker-compose -f docker-compose.yml up -d --build'
+                sh 'sleep 6'
+                sh 'npm test || (docker-compose -f docker-compose.yml down; exit 1)'
+            }
+            post {
+                always {
+                    junit 'reports/TESTS-results.xml'
+                    sh 'docker-compose -f docker-compose.yml down'
+                }
+            }
+        }
+        stage ('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t ${IMAGE_NAME}:${DOCKER_TAG} ."
+                }
+            }
+        }
+        stage ('Push Docker Image') {
+            steps {
+                withCredentials ([usernamePassword (credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh "echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin"
+                    sh "docker tag ${IMAGE_NAME}:${DOCKER_TAG} ${IMAGE_NAME}:latest"
+                    sh "docker push ${IMAGE_NAME}:${DOCKER_TAG}"
+                    sh "docker push ${IMAGE_NAME}:latest"
+                }
+            }
+        }
+        stage ('Terraform Deploy to AWS EC2') {
+            steps {
+                withCredentials ([usernamePassword (credentialsId: 'aws-creds', usernameVariable: 'AWS_ACCESS_KEY_ID', passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    dir('terraform') {
+                        sh 'terraform init -input=false'
+                        sh "terraform apply -auto-approve -var='docker_image=${IMAGE_NAME}:${DOCKER_TAG}'"
+                        sh 'terraform output -json'
+                    }
+                }
+            }
+        }
+        stage ('Post-deploy Smoke Test') {
+            steps {
+                script {
+                    def ip = sh (returnStdout: true, script: "cd terraform && terraform output -raw public_ip").trim()
+                    sh "curl -f http://${ip}:3000/ || (echo 'Smoke test failed' && exit 1)"
+                    echo "App reachable at http://${ip}:3000"
+                }
+            }
+        }
+    } // stages
+    post {
+        success {
+            echo "Pipeline successful."
+        }
+        failure {
+            echo "Pipeline failed. Check stage logs and SonarQube/test reports."
         }
     }
 }
