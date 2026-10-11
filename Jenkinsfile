@@ -26,6 +26,13 @@ pipeline {
                 withCredentials ([string (credentialsId: 'SONAR_TOKEN', variable: 'SONAR_TOKEN')]) {
                     withSonarQubeEnv('SonarQube Server') {
                         sh '''
+                            echo "Waiting for SonarQube to be fully ready..."
+                            until curl -sU "${SONAR_TOKEN}:" "$SONAR_HOST_URL/api/system/status" | grep -q '"status":"UP"'; do
+                                echo "SonarQube is starting up, sleeping for 10s..."
+                                sleep 10
+                            done
+                            echo "SonarQube is UP and running!"
+
                             sonar-scanner \
                             -Dsonar.projectKey=spacexp-sample \
                             -Dsonar.sources=. \
