@@ -18,7 +18,7 @@ describe('UI Integration Tests', function () {
 
       driver = await new Builder()
         .forBrowser('chrome')
-        .usingServer('http://localhost:4444')
+        .usingServer('http://spacexp-selenium:4444') // localhost වෙනුවට සෙලීනියම් කන්ටේනර් නම යොදා ඇත
         .setChromeOptions(options)
         .build();
         
