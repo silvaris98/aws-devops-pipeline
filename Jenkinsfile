@@ -1,6 +1,12 @@
 pipeline {
     agent any
     
+    environment {
+        SONAR_HOST_URL = 'http://16.171.137.199:9000'
+        SONAR_TOKEN    = 'sqa_0e4b902df0ba2e7c59f5da58038b4375c6a59c37'
+        DOCKER_IMAGE   = 'wasuaa/spacexp-sample:latest'
+    }
+    
     stages {
         stage('Checkout') {
             steps {
@@ -17,20 +23,17 @@ pipeline {
         
         stage('SonarQube Analysis') {
             steps {
-                withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
-                    sh 'sonar-scanner -Dsonar.host.url=http://16.171.137.199:9000 -Dsonar.login=${SONAR_TOKEN}'
-                }
+                sh 'sonar-scanner -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_TOKEN}'
             }
         }
         
         stage('Docker Build & Push') {
             steps {
                 script {
-                    // ඔබගේ ඩොකර් සාර්ථකව බිල්ඩ් කර පුෂ් කිරීම සඳහා මෙහි විධාන යොදන්න
-                    // උදාහරණයක් ලෙස:
-                    // sh 'docker build -t your-docker-image . '
-                    // sh 'docker push your-docker-image'
-                    echo "Docker build and push stage..."
+                    echo "Building Docker image..."
+                    sh "docker build -t ${DOCKER_IMAGE} ."
+                    echo "Pushing Docker image..."
+                    // sh "docker push ${DOCKER_IMAGE}"
                 }
             }
         }
