@@ -29,6 +29,23 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            steps {
+                // Jenkins හි සෝනාර්කියුබ් සර්වර් එක කොන්ෆිගර් කර ඇති නම් withSonarQubeEnv භාවිතා කළ යුතුය
+                withSonarQubeEnv('SonarQubeServer') { // 'SonarQubeServer' යනු ඔබේ Jenkins හි දී ඇති නමයි
+                    sh 'sonar-scanner'
+                }
+            }
+        }
+
+        stage('Wait for Quality Gate') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh 'docker build -t aws-devops-pipeline-spacexp-app:latest .'
