@@ -31,8 +31,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                // Jenkins හි සෝනාර්කියුබ් සර්වර් එක කොන්ෆිගර් කර ඇති නම් withSonarQubeEnv භාවිතා කළ යුතුය
-                withSonarQubeEnv('SonarQubeServer') { // 'SonarQubeServer' යනු ඔබේ Jenkins හි දී ඇති නමයි
+                withSonarQubeEnv('SonarQubeServer') { 
                     sh 'sonar-scanner'
                 }
             }
