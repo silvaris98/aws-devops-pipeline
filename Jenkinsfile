@@ -48,11 +48,9 @@ pipeline {
         
         stage('Terraform Apply') {
             steps {
-                script {
-                    // වර්ක්ස්පේස් එකේ ෆයිල්ස් හරියටම තිබේදැයි පරීක්ෂා කර බැලීමට 
+                // main.tf සහ variables.tf ඇති 'terraform' ෆෝල්ඩරය වෙත මාරු වී විධාන ක්‍රියාත්මක කරයි
+                dir('terraform') {
                     sh 'ls -la'
-                    
-                    // ටර්ෆෝම් ඉනිට් සහ ඇප්ලයි කිරීම
                     sh 'terraform init'
                     sh 'terraform apply -auto-approve'
                 }
