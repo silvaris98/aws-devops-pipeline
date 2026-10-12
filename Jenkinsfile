@@ -17,14 +17,22 @@ pipeline {
         stage('Install & Build') {
             steps {
                 sh 'npm ci'
-                // Unit tests run වී reports/TESTS-results.xml ෆයිල් එක ජෙනරේට් කරයි
+                
+                // සෙලේනියම් ටෙස්ට් එක සඳහා Selenium Standalone Server එක පසුබිමින් ස්ටාර්ට් කිරීම
+                // (ඔබ සර්වර් එකේ selenium-server.jar දමා ඇත්නම් හෝ ඩොකර් කන්ටේනර් එකක් ලෙස ක්‍රියාත්මක කරන්නේ නම් මෙතැනින් හැසිරවිය හැක)
+                script {
+                    sh 'nohup java -jar /opt/selenium-server.jar standalone &>/dev/null & '
+                    // සර්වර් එක ස්ටාර්ට් වීමට තත්පර කිහිපයක් ලබා දීම
+                    sleep 5
+                }
+                
+                // Unit / UI tests run වීම සහ JUnit XML report ජෙනරේට් වීම
                 sh 'npm run unit'
             }
         }
         
         stage('Publish Test Results') {
             steps {
-                // ජෙනරේට් වූ JUnit XML රිපෝට් එක Jenkins වෙත ලබා දීම
                 junit 'reports/TESTS-results.xml'
             }
         }
@@ -56,7 +64,6 @@ pipeline {
         
         stage('Terraform Apply') {
             steps {
-                // ඔබේ structure එකේ ඇති test/terraform ෆෝල්ඩරය වෙත මාරු වී ක්‍රියාත්මක වේ
                 dir('test/terraform') {
                     sh 'terraform init'
                     sh 'terraform apply -auto-approve'
