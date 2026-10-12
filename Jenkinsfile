@@ -24,6 +24,7 @@ pipeline {
                         COUNT=0
                         
                         while [ $COUNT -lt $RETRIES ]; do
+                            // SONAR_TOKEN එක නිවැරදිව curl විධානයට යොමු කිරීම
                             if curl -sU "${SONAR_TOKEN}:" http://16.171.137.199:9000/api/system/status | grep -q '"status":"UP"'; then
                                 echo "SonarQube is up and running!"
                                 break
@@ -37,10 +38,11 @@ pipeline {
                             echo "Error: SonarQube failed to start within the expected time."
                             exit 1
                         fi
-                        
-                        // Sonar Scanner විධානය (ඔබගේ ප්‍රොජෙක්ට් එකට අදාළව මෙය වෙනස් විය හැක)
-                        // sonar-scanner
                     '''
+                    
+                    // සෝනාර් ස්කෑනර් මෙවලම මඟින් කෝඩ් এනලයිසිස් කිරීම සඳහා
+                    // (ඔබේ සර්වර් එකේ sonar-scanner ඉන්ස්ටෝල් කර ඇති මාර්ගය හෝ ජෙන්කින්ස් ටූල් කන්ෆිගර් කර ඇති පරිදි මෙය ක්‍රියාත්මක වේ)
+                    sh 'sonar-scanner'
                 }
             }
         }
