@@ -16,24 +16,22 @@ pipeline {
 
         stage('Run Integration (Docker + Selenium)') {
             steps {
-                script {
-                    try {
-                        sh 'docker-compose -f docker-compose.yml up -d --build'
-                        // වෙබ් ඇප් එක සම්පූර්ණයෙන්ම ස්ටාර්ට් වන තෙක් තත්පර 25ක් රැඳී සිටියි
-                        sh 'sleep 25'
-                        sh 'npm test'
-                    } finally {
-                        sh 'docker-compose -f docker-compose.yml down'
-                    }
+                sh '''
+                    docker-compose -f docker-compose.yml up -d --build
+                    sleep 25
+                    npm test
+                '''
+            }
+            post {
+                always {
+                    sh 'docker-compose -f docker-compose.yml down'
                 }
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                script {
-                    // SonarQube ස්කෑන් කිරීමේ විධානයන් මෙහි ඇත
-                }
+                sh 'echo "SonarQube analysis step"'
             }
         }
 
@@ -53,9 +51,7 @@ pipeline {
 
         stage('Push Docker Image') {
             steps {
-                script {
-                    // ඩොකර් රෙජისტ්‍රි වෙත පුෂ් කිරීමේ විධානයන් මෙහි ඇත
-                }
+                sh 'echo "Push docker image step"'
             }
         }
 
