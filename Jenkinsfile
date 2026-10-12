@@ -39,18 +39,18 @@ pipeline {
                 script {
                     echo "Building Docker image..."
                     sh "docker build -t ${DOCKER_IMAGE} ."
-                    echo "Pushing Docker image..."
-                    // sh "docker push ${DOCKER_IMAGE}"
+                    
+                    echo "Pushing Docker image to Docker Hub..."
+                    sh "docker push ${DOCKER_IMAGE}"
                 }
             }
         }
         
         stage('Terraform Apply') {
             steps {
-                dir('terraform') {
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve'
-                }
+                // main.tf සහ variables.tf root එකේ ඇති නිසා වෙනම directory වෙනස් කිරීමක් අවශ්‍ය නොවේ
+                sh 'terraform init'
+                sh 'terraform apply -auto-approve'
             }
         }
     }
