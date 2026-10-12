@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "unit": "echo 'no unit tests yet' && exit 0",
+    "unit": "npx mocha --timeout 90000 test/ui.test.js --reporter mocha-junit-reporter --reporter-options mocha_junit_reporter_output_path=reports/TESTS-results.xml",
     "test": "npx mocha --timeout 90000 test/ui.test.js"
   },
   "dependencies": {
