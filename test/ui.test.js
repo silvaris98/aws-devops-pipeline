@@ -18,7 +18,7 @@ describe('UI Integration Tests', function () {
 
       driver = await new Builder()
         .forBrowser('chrome')
-        .usingServer('http://spacexp-selenium:4444') // localhost වෙනුවට සෙලීනියම් කන්ටේනර් නම යොදා ඇත
+        .usingServer('http://localhost:4444')
         .setChromeOptions(options)
         .build();
         
@@ -38,7 +38,7 @@ describe('UI Integration Tests', function () {
 
   it('Should load the home page successfully', async function () {
     console.log('--- NAVIGATING TO APP ---');
-    await driver.get('http://spacexp-app:8080');
+    await driver.get('http://localhost:8081');
     
     await driver.sleep(2000);
 
