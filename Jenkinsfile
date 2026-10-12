@@ -48,9 +48,14 @@ pipeline {
         
         stage('Terraform Apply') {
             steps {
-                // main.tf සහ variables.tf root එකේ ඇති නිසා වෙනම directory වෙනස් කිරීමක් අවශ්‍ය නොවේ
-                sh 'terraform init'
-                sh 'terraform apply -auto-approve'
+                script {
+                    // වර්ක්ස්පේස් එකේ ෆයිල්ස් හරියටම තිබේදැයි පරීක්ෂා කර බැලීමට 
+                    sh 'ls -la'
+                    
+                    // ටර්ෆෝම් ඉනිට් සහ ඇප්ලයි කිරීම
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve'
+                }
             }
         }
     }
