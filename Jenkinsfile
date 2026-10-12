@@ -18,8 +18,8 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube Server') {
-                    echo "Bypassing SonarQube readiness check and running scanner directly..."
-                    sh 'sonar-scanner'
+                    // SONAR_TOKEN එක environment variable එක හරහා සෘජුවම sonar-scanner වෙත ලබා දීම
+                    sh 'sonar-scanner -Dsonar.host.url=http://16.171.137.199:9000 -Dsonar.login=${SONAR_TOKEN}'
                 }
             }
         }
