@@ -18,7 +18,7 @@ describe('UI Integration Tests', function () {
 
       driver = await new Builder()
         .forBrowser('chrome')
-        .usingServer('http://localhost:4444')
+        .usingServer('http://localhost:4444') // Host එකේ සිට Selenium කන්ටේනර් එකට සම්බන්ධ වීමට
         .setChromeOptions(options)
         .build();
         
@@ -38,7 +38,8 @@ describe('UI Integration Tests', function () {
 
   it('Should load the home page successfully', async function () {
     console.log('--- NAVIGATING TO APP ---');
-    await driver.get('http://localhost:8081');
+    // Selenium කන්ටේනර් එක ඇතුළත සිටින බ්‍රවුසරය app කන්ටේනර් එකට යාමට Docker network නම භාවිතා කරයි
+    await driver.get('http://spacexp-app:8080');
     
     await driver.sleep(2000);
 
