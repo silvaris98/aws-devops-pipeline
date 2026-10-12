@@ -17,9 +17,29 @@ pipeline {
         
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('SonarQube Server') {
-                    // SONAR_TOKEN එක environment variable එක හරහා සෘජුවම sonar-scanner වෙත ලබා දීම
+                withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
                     sh 'sonar-scanner -Dsonar.host.url=http://16.171.137.199:9000 -Dsonar.login=${SONAR_TOKEN}'
+                }
+            }
+        }
+        
+        stage('Docker Build & Push') {
+            steps {
+                script {
+                    // ඔබගේ ඩොකර් සාර්ථකව බිල්ඩ් කර පුෂ් කිරීම සඳහා මෙහි විධාන යොදන්න
+                    // උදාහරණයක් ලෙස:
+                    // sh 'docker build -t your-docker-image . '
+                    // sh 'docker push your-docker-image'
+                    echo "Docker build and push stage..."
+                }
+            }
+        }
+        
+        stage('Terraform Apply') {
+            steps {
+                dir('terraform') {
+                    sh 'terraform init'
+                    sh 'terraform apply -auto-approve'
                 }
             }
         }
