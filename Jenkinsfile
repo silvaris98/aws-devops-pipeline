@@ -23,7 +23,14 @@ pipeline {
         
         stage('SonarQube Analysis') {
             steps {
-                sh 'sonar-scanner -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_TOKEN}'
+                sh '''
+                    sonar-scanner \
+                    -Dsonar.host.url=${SONAR_HOST_URL} \
+                    -Dsonar.login=${SONAR_TOKEN} \
+                    -Dsonar.projectKey=spacexp-sample-app \
+                    -Dsonar.projectName="SpaceX Sample App" \
+                    -Dsonar.sources=.
+                '''
             }
         }
         
