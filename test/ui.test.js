@@ -38,10 +38,25 @@ describe('UI Integration Tests', function () {
 
   it('Should load the home page successfully', async function () {
     console.log('--- NAVIGATING TO APP ---');
-    // Selenium බ්‍රවුසරය host එකේ 8081 පෝට් එකට ප්‍රවේශ වීම සඳහා host.docker.internal භාවිතා කරයි
-    await driver.get('http://host.docker.internal:8081');
     
-    await driver.sleep(2000);
+    const targetUrl = 'http://host.docker.internal:8081';
+    let success = false;
+    
+    // සර්වර් එක ස්ටාර්ට් වන තුරු වාර කිහිපයක් උත්සාහ කිරීම (Retry mechanism)
+    for (let i = 0; i < 5; i++) {
+        try {
+            await driver.get(targetUrl);
+            success = true;
+            break;
+        } catch (err) {
+            console.log(`Connection attempt ${i + 1} failed, retrying in 3 seconds...`);
+            await driver.sleep(3000);
+        }
+    }
+    
+    if (!success) {
+        throw new Error('Failed to connect to the application after multiple attempts.');
+    }
 
     const title = await driver.getTitle();
     console.log('--- FETCHED PAGE TITLE:', title, '---');
