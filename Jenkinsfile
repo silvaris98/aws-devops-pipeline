@@ -48,9 +48,8 @@ pipeline {
         
         stage('Terraform Apply') {
             steps {
-                // main.tf සහ variables.tf ඇති 'terraform' ෆෝල්ඩරය වෙත මාරු වී විධාන ක්‍රියාත්මක කරයි
-                dir('terraform') {
-                    sh 'ls -la'
+                // 'test/terraform' ෆෝල්ඩරයට මාරු වී ටර්ෆෝම් ක්‍රියාත්මක කරයි
+                dir('test/terraform') {
                     sh 'terraform init'
                     sh 'terraform apply -auto-approve'
                 }
