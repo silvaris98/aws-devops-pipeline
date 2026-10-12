@@ -43,9 +43,15 @@ pipeline {
 
         stage('Terraform Deploy to AWS EC2') {
             steps {
-                dir('terraform') {
-                    sh 'terraform init'
-                    sh 'terraform apply -auto-approve'
+                script {
+                    if (fileExists('terraform/main.tf')) {
+                        dir('terraform') {
+                            sh 'terraform init'
+                            sh 'terraform apply -auto-approve'
+                        }
+                    } else {
+                        echo 'Terraform configuration files not found, skipping apply.'
+                    }
                 }
             }
         }
