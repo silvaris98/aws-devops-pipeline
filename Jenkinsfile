@@ -17,7 +17,15 @@ pipeline {
         stage('Install & Build') {
             steps {
                 sh 'npm ci'
+                // Unit tests run වී reports/TESTS-results.xml ෆයිල් එක ජෙනරේට් කරයි
                 sh 'npm run unit'
+            }
+        }
+        
+        stage('Publish Test Results') {
+            steps {
+                // ජෙනරේට් වූ JUnit XML රිපෝට් එක Jenkins වෙත ලබා දීම
+                junit 'reports/TESTS-results.xml'
             }
         }
         
@@ -48,7 +56,7 @@ pipeline {
         
         stage('Terraform Apply') {
             steps {
-                // 'test/terraform' ෆෝල්ඩරයට මාරු වී ටර්ෆෝම් ක්‍රියාත්මක කරයි
+                // ඔබේ structure එකේ ඇති test/terraform ෆෝල්ඩරය වෙත මාරු වී ක්‍රියාත්මක වේ
                 dir('test/terraform') {
                     sh 'terraform init'
                     sh 'terraform apply -auto-approve'
